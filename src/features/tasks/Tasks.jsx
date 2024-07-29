@@ -1,18 +1,35 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTasks, statusButtonPresses } from "./taskSlice";
+import { useEffect } from "react";
 
 const Tasks = () => {
-  const tasks = useSelector((state) => state.tasks);
+  const dispatch = useDispatch();
+  const tasksState = useSelector((state) => state);
+
+  const { tasks, status, error } = tasksState;
+
+  const handleOnClick = (taskId) => {
+    dispatch(statusButtonPresses(taskId));
+  };
+
+  useEffect(() => {
+    dispatch(fetchTasks());
+  }, []);
 
   return (
     <div>
-      {tasks.tasks.map((task) => (
-        <div key={task.taskId}>
-          <h2>{task.taskDate}</h2>
+      {status === "Pending" && <p>Loading...</p>}
+      {error && <p>{error}</p>}
+      {tasks.tasks.map((task, i) => (
+        <div key={i}>
+          <h2>{task.date}</h2>
           <ul>
-            {task.taskList.map((t, i) => (
-              <li key={i}>
+            {task.tasks.map((t) => (
+              <li key={t.taskId}>
                 <p>{t.task}</p>
-                <p>Status: {t.status}</p>
+                <button onClick={() => handleOnClick(t.taskId, t.task)}>
+                  {t.taskStatus}
+                </button>
               </li>
             ))}
           </ul>
